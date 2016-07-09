@@ -1,10 +1,17 @@
 # Rob Miller
-# plot1.R
+# plot2.R
 # Course Project 1
 
 
 # read data from temp directory
 df<-read.table("c:/temp/household_power_consumption.txt",sep = ";",header = TRUE,stringsAsFactors = FALSE)
+
+# create new variable combining Date and Time columns
+# reformat
+# extract day names and assign to new variable
+df$DateTime<-paste(df$Date,df$Time)
+df$DateTime<-strptime(df$DateTime,format = "%d/%m/%Y %H:%M:%S",tz="")
+df$days<-weekdays(df$DateTime)
 
 # reassign classes of variables
 df$Date<-as.Date(df$Date,"%d/%m/%Y");
@@ -17,22 +24,26 @@ df$Sub_metering_2<-as.numeric(df$Sub_metering_2)
 df$Sub_metering_3<-as.numeric(df$Sub_metering_3)
 
 # set start and end dates
-df_start<-as.Date("2007-02-01")
-df_end<-as.Date("2007-02-02")
+df_start<-as.POSIXlt("2007-02-01 00:00:00")
+df_end<-as.POSIXlt("2007-02-03 00:00:00")
 
 
 # subset dataset between start and end dates
-#system.time(df_subset<-df[df$Date>=df_start & df$Date<=df_end,])
-df_subset<-subset(df, Date>=df_start & Date<=df_end)
+df_subset<-subset(df, df$DateTime>=df_start & df$DateTime<=df_end)
+
+# extract weekay names for x-axis
+x_axis_days<-unique(df_subset$day)
 
 # format plotting area
 par(mfrow=c(1,1))
 
-# plot histogram
-with(df_subset,hist(as.numeric(Global_active_power),main = "Global Active Power",col = "red",xlab="Global Active Power (kilowatts)"))
+#plot Gloval Active Power
+plot(y=df_subset$Global_active_power,x=df_subset$DateTime,type="l",xlab='',ylab='')
+title(ylab="Global Active Power (kilowatts)",xlab=NULL)
+
 
 # output to 480x480 PNG file
-dev.copy(png,file="plot1.png")
+dev.copy(png,file="plot2.png")
 dev.off()
 
 
